@@ -1,0 +1,111 @@
+
+
+Sub stock_val():
+
+'Declare our variables
+
+Dim current_ticker As String
+Dim ticker_count As Integer
+Dim running_volume As Double
+Dim ws_count As Integer
+Dim first_open As Double
+Dim last_close As Double
+Dim low_perc As Double
+Dim high_perc As Double
+Dim high_vol As Double
+
+ 
+'number of worksheets
+ws_count = ActiveWorkbook.Worksheets.Count
+
+'This for loop iterates over all the worksheets in the current workbook
+For current = 1 To ws_count
+
+‘initializing certain values
+current_ticker = ActiveWorkbook.Worksheets(current).Cells(2, 1).Value
+first_open = ActiveWorkbook.Worksheets(current).Cells(2, 3).Value
+ticker_count = 2
+running_volume = 0
+
+
+ActiveWorkbook.Worksheets(current).Cells(1, 9) = "Ticker"
+ActiveWorkbook.Worksheets(current).Cells(1, 10) = "Total Stock Volume"
+ActiveWorkbook.Worksheets(current).Cells(1, 11) = "Yearly Change"
+ActiveWorkbook.Worksheets(current).Cells(1, 12) = "Percent Change"
+
+    
+For j = 2 To ActiveWorkbook.Worksheets(current).Range("A1").End(xlDown).Row
+
+
+ If ActiveWorkbook.Worksheets(current).Cells(j, 1).Value = current_ticker Then
+        running_volume = running_volume + ActiveWorkbook.Worksheets(current).Cells(j, 7).Value
+ ElseIf j = ActiveWorkbook.Worksheets(current).Range("A1").End(xlDown).Row Then
+        last_close = ActiveWorkbook.Worksheets(current).Cells(j, 6).Value
+        ActiveWorkbook.Worksheets(current).Cells(ticker_count, 10) = last_close - first_open
+        ActiveWorkbook.Worksheets(current).Cells(ticker_count, 11) = last_close / first_open
+        ActiveWorkbook.Worksheets(current).Cells(ticker_count, 9) = current_ticker
+        ActiveWorkbook.Worksheets(current).Cells(ticker_count, 10) = running_volume
+        running_volume = ActiveWorkbook.Worksheets(current).Cells(j, 7).Value
+        current_ticker = ActiveWorkbook.Worksheets(current).Cells(j, 1).Value
+  Else
+        last_close = ActiveWorkbook.Worksheets(current).Cells(j - 1, 6).Value
+        ActiveWorkbook.Worksheets(current).Cells(ticker_count, 11) = last_close - first_open
+        ActiveWorkbook.Worksheets(current).Cells(ticker_count, 12) = (last_close - first_open) / (first_open + 0.000001)
+        If ActiveWorkbook.Worksheets(current).Cells(ticker_count, 11) < 0 Then
+            ActiveWorkbook.Worksheets(current).Cells(ticker_count, 11).Interior.Color = RGB(255, 0, 0)
+        Else
+            ActiveWorkbook.Worksheets(current).Cells(ticker_count, 11).Interior.Color = RGB(0, 255, 0)
+        End If
+        ActiveWorkbook.Worksheets(current).Cells(ticker_count, 9) = current_ticker
+        ActiveWorkbook.Worksheets(current).Cells(ticker_count, 10) = running_volume
+        running_volume = ActiveWorkbook.Worksheets(current).Cells(j, 7).Value
+        current_ticker = ActiveWorkbook.Worksheets(current).Cells(j, 1).Value
+        ticker_count = ticker_count + 1
+        first_open = ActiveWorkbook.Worksheets(current).Cells(j, 3).Value
+
+        End If
+
+
+Next j
+
+ActiveWorkbook.Worksheets(current).Cells(2, 15) = "Greatest % Decrease"
+ActiveWorkbook.Worksheets(current).Cells(3, 15) = "Greatest % Increase"
+ActiveWorkbook.Worksheets(current).Cells(4, 15) = "Greatest Total Value"
+ActiveWorkbook.Worksheets(current).Cells(1, 16) = "Ticker"
+ActiveWorkbook.Worksheets(current).Cells(1, 17) = "Value"
+
+low_perc = ActiveWorkbook.Worksheets(current).Cells(2, 12)
+high_perc = ActiveWorkbook.Worksheets(current).Cells(2, 12)
+high_vol = ActiveWorkbook.Worksheets(current).Cells(2, 10)
+
+
+For k = 2 To ActiveWorkbook.Worksheets(current).Range("A9").End(xlDown).Row
+If ActiveWorkbook.Worksheets(current).Cells(k, 12) < low_perc Then
+ActiveWorkbook.Worksheets(current).Cells(2, 16) = ActiveWorkbook.Worksheets(current).Cells(k, 9)
+low_perc = ActiveWorkbook.Worksheets(current).Cells(k, 12)
+ActiveWorkbook.Worksheets(current).Cells(2, 17) = low_perc
+End If
+
+If ActiveWorkbook.Worksheets(current).Cells(k, 12) > high_perc Then
+ActiveWorkbook.Worksheets(current).Cells(3, 16) = ActiveWorkbook.Worksheets(current).Cells(k, 9)
+high_perc = ActiveWorkbook.Worksheets(current).Cells(k, 12)
+ActiveWorkbook.Worksheets(current).Cells(3, 17) = high_perc
+End If
+
+If ActiveWorkbook.Worksheets(current).Cells(k, 10) > high_vol Then
+ActiveWorkbook.Worksheets(current).Cells(4, 16) = ActiveWorkbook.Worksheets(current).Cells(k, 9)
+high_vol = ActiveWorkbook.Worksheets(current).Cells(k, 10)
+ActiveWorkbook.Worksheets(current).Cells(4, 17) = high_vol
+End If
+
+
+Next k
+
+Next current
+
+    
+    
+
+End Sub
+
+
